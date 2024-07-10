@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "default": "pets-square"
+  },
+  "targets": {
+    "pets-square": {
+      "hosting": {
+        "admin": [
+          "admin-petssquare"
+        ],
+        "petsquare": [
+          "pets-square"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

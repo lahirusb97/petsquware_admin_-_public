@@ -1,0 +1,16 @@
+[
+  {
+    "id": 0,
+    "productimg": "https://lp2.hm.com/hmgoepprod?set=format%5Bwebp%5D%2Cquality%5B79%5D%2Csource%5B%2F58%2F18%2F58189f3e9619b9688f1215517cad4596f2bbd846.jpg%5D%2Corigin%5Bdam%5D%2Ccategory%5B%5D%2Ctype%5BDESCRIPTIVESTILLLIFE%5D%2Cres%5Bm%5D%2Chmver%5B2%5D&call=url%5Bfile%3A%2Fproduct%2Fmain%5D",
+    "productname": "shirt",
+    "productdescription": "Description Description Description",
+    "productprice": 1999
+  },
+  {
+    "id": 1,
+    "productimg": "https://lp2.hm.com/hmgoepprod?set=format%5Bwebp%5D%2Cquality%5B79%5D%2Csource%5B%2F36%2Fc2%2F36c2ee1c5dfb63c7563fe288dfea9f33a19d43a2.jpg%5D%2Corigin%5Bdam%5D%2Ccategory%5Bmen_shirts_casual%5D%2Ctype%5BDESCRIPTIVESTILLLIFE%5D%2Cres%5Bm%5D%2Chmver%5B2%5D&call=url%5Bfile%3A%2Fproduct%2Fmain%5D",
+    "productname": "shirt",
+    "productdescription": "Description Description Description",
+    "productprice": 799
+  }
+]
