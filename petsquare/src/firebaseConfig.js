@@ -25,17 +25,17 @@ const db = getFirestore(app);
 // Initialize Firestore
 
 // Connect to Firestore emulator
-// connectFirestoreEmulator(db, "localhost", 8085);
+connectFirestoreEmulator(db, "localhost", 8085);
 
 // Initialize Storage
 const storage = getStorage(app);
 // Connect to Storage emulator
-// connectStorageEmulator(storage, "localhost", 9199);
+connectStorageEmulator(storage, "localhost", 9199);
 
 // Initialize Functions
 const functions = getFunctions(app);
 // Connect to Functions emulator
-// connectFunctionsEmulator(functions, "localhost", 5001);
+connectFunctionsEmulator(functions, "localhost", 5001);
 
 // Initialize Auth
 const auth = getAuth(app);

@@ -27,7 +27,7 @@ const ColorAdd = ({ colorsData, setColors }) => {
   };
 
   const handleQuantityChange = (e) => {
-    setInputQuantity(e.target.value);
+    setInputQuantity(parseInt(e.target.value));
   };
 
   const handleAddColor = () => {

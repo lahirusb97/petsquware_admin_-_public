@@ -17,7 +17,7 @@ const DetailBox = ({ productData }) => {
     color: productData["pricing"][0]["color"],
     id: productData["pricing"][0]["id"],
   });
-  console.log(priceData);
+
   const handleAddToCart = () => {
     const item = {
       ...priceData,

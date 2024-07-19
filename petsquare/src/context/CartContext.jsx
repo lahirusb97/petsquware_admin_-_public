@@ -62,24 +62,33 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = (item) => {
-    setCartItems((prevItems) => {
-      const itemIndex = prevItems.findIndex(
-        (cartItem) => cartItem.id === item.id
-      );
+    const findItemExists = cartItems.find(
+      (cartItem) => cartItem.id === item.id
+    );
 
-      if (
-        itemIndex !== -1 &&
-        item["qty"] <= prevItems[itemIndex].userSelectQty
-      ) {
-        // Item found, increment its quantity
-        const updatedItems = [...prevItems];
-        updatedItems[itemIndex].userSelectQty += 1;
-        return updatedItems;
+    if (findItemExists) {
+      const newQty = findItemExists.userSelectQty + item.userSelectQty;
+      if (newQty <= item.qty) {
+        setCartItems(
+          cartItems.map((cartItem) =>
+            cartItem.id === item.id
+              ? { ...cartItem, userSelectQty: newQty }
+              : cartItem
+          )
+        );
       } else {
-        // Item not found, add new item with quantity 1
-        return [...prevItems, { ...item, userSelectQty: 1 }];
+        console.log("Quantity exceeds available stock.");
       }
-    });
+    } else {
+      if (item.userSelectQty <= item.qty) {
+        setCartItems([
+          ...cartItems,
+          { ...item, userSelectQty: item.userSelectQty },
+        ]);
+      } else {
+        console.log("Quantity exceeds available stock.");
+      }
+    }
   };
 
   const removeFromCart = (itemId) => {
@@ -87,21 +96,36 @@ export const CartProvider = ({ children }) => {
   };
 
   const incrementQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
-      )
+    const findItemExists = cartItems.filter(
+      (cartItem) => cartItem.id === itemId
     );
+    if (findItemExists[0].userSelectQty < findItemExists[0]["qty"]) {
+      setCartItems(
+        cartItems.map((cartItem) =>
+          cartItem.id === itemId
+            ? { ...cartItem, userSelectQty: cartItem.userSelectQty + 1 }
+            : cartItem
+        )
+      );
+    }
   };
 
   const decrementQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId
-          ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
-          : item
-      )
+    const findItemExists = cartItems.filter(
+      (cartItem) => cartItem.id === itemId
     );
+    if (
+      findItemExists[0].userSelectQty <= findItemExists[0]["qty"] &&
+      findItemExists[0].userSelectQty > 1
+    ) {
+      setCartItems(
+        cartItems.map((cartItem) =>
+          cartItem.id === itemId
+            ? { ...cartItem, userSelectQty: cartItem.userSelectQty - 1 }
+            : cartItem
+        )
+      );
+    }
   };
 
   return (

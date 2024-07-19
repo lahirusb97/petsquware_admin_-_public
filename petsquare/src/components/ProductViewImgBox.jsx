@@ -5,20 +5,16 @@ import "slick-carousel/slick/slick-theme.css";
 import DetailBox from "./DetailBox";
 import { useParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import imgb1 from "../assets/ProductImg/imgb1.jpg";
-import imgb2 from "../assets/ProductImg/imgb2.jpg";
-import imgb3 from "../assets/ProductImg/imgb3.jpg";
-import { db } from "../../../admin/src/firebaseConfig";
+import { db } from "../firebaseConfig";
 
 export default function ProductViewImgBox() {
   const { product } = useParams();
-  const imgList = [imgb1, imgb2, imgb3];
   const [currentImg, setCurrentImg] = useState(0);
   const [productData, setProductData] = useState(null);
 
   useEffect(() => {
     const fetchProductData = async () => {
-      const docRef = doc(db, "product", product); // Assuming "products" is your collection name
+      const docRef = doc(db, "product", product); // Assuming "product" is your collection name
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -38,7 +34,7 @@ export default function ProductViewImgBox() {
     setCurrentImg(index);
   };
 
-  // Responsive settings for the slider
+  // Slider settings
   const settings = {
     infinite: true,
     slidesToShow: 4,
@@ -75,6 +71,9 @@ export default function ProductViewImgBox() {
     return <div>Loading...</div>; // Placeholder for when data is being fetched
   }
 
+  // Render conditionally based on the number of images
+  const hasMultipleImages = productData.images.length > 1;
+
   return (
     <div className="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
       {/* Product Image Display */}
@@ -84,23 +83,25 @@ export default function ProductViewImgBox() {
           src={productData.images[currentImg]}
           alt={`Product ${currentImg}`}
         />
-        <div className="border-2 my-4">
-          <Slider {...settings} className="mt-4">
-            {productData.images.map((img, index) => (
-              <div
-                className="shadow-md"
-                key={index}
-                onClick={() => handleImageClick(index)}
-              >
-                <img
-                  className="w-full object-contain cursor-pointer"
-                  src={img}
-                  alt={`Product ${index}`}
-                />
-              </div>
-            ))}
-          </Slider>
-        </div>
+        {hasMultipleImages && (
+          <div className="border-2 my-4">
+            <Slider {...settings} className="mt-4">
+              {productData.images.map((img, index) => (
+                <div
+                  className="shadow-md"
+                  key={index}
+                  onClick={() => handleImageClick(index)}
+                >
+                  <img
+                    className="w-full object-contain cursor-pointer"
+                    src={img}
+                    alt={`Product ${index}`}
+                  />
+                </div>
+              ))}
+            </Slider>
+          </div>
+        )}
       </div>
 
       {/* Detail Box Component */}

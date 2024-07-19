@@ -30,7 +30,9 @@ export default function CartDrawer() {
     (total, item) => total + item.price * item.userSelectQty,
     0
   );
-
+  const checkoutToStripe = () => {
+    console.log(cartItems);
+  };
   return (
     <Drawer anchor="right" open={openCart} onClose={toggleCart}>
       <Box
@@ -109,6 +111,7 @@ export default function CartDrawer() {
             <Button
               variant="contained"
               color="primary"
+              onClick={checkoutToStripe}
               style={{ marginTop: "10px" }}
             >
               Checkout
