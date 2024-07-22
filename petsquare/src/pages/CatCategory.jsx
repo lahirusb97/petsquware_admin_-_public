@@ -13,7 +13,7 @@ export default function CatCategory() {
 
   const { products, loading, loadMoreProducts } = useCategoryWiseProduct(
     10,
-    location.pathname.replace("/", "")
+    "cat"
   );
   console.log(products);
   return (

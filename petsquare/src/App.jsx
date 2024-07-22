@@ -36,6 +36,16 @@ function App() {
       element: <Category />,
       errorElement: <div>error</div>,
     },
+    // {
+    //   path: "/success",
+    //   element: <Cancel />,
+    //   errorElement: <div>error</div>,
+    // },
+    // {
+    //   path: "/cancel",
+    //   element: <Sucess />,
+    //   errorElement: <div>error</div>,
+    // },
   ]);
 
   return (

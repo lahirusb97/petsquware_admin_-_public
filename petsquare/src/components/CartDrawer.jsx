@@ -11,7 +11,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCartContext } from "../context/CartContext";
-
+import { loadStripe } from "@stripe/stripe-js";
 export default function CartDrawer() {
   const {
     openCart,
@@ -30,15 +30,40 @@ export default function CartDrawer() {
     (total, item) => total + item.price * item.userSelectQty,
     0
   );
-  const checkoutToStripe = () => {
-    console.log(cartItems);
+  const checkoutToStripe = async () => {
+    const items = cartItems.map((item) => ({
+      price: item.id,
+      quantity: item.userSelectQty,
+    }));
+
+    const stripe = await getStripe();
+    const { error } = await stripe.redirectToCheckout({
+      lineItems: items,
+      mode: "payment",
+      successUrl: `${window.location.origin}/success`,
+      cancelUrl: `${window.location.origin}/cancel`,
+    });
+    if (error) {
+      console.error(error);
+    }
   };
+  const getStripe = (() => {
+    let stripePromise;
+    return () => {
+      if (!stripePromise) {
+        stripePromise = loadStripe(
+          "pk_test_51PXmjKIT4CAR61BEQ8aawVjGMNA1Mb0dWva2ldQv9foYNczkIsWpRBluZRysZq1fKAMm70FdqzdhNGCC3JTpu8O5003j5OQ775"
+        );
+      }
+      return stripePromise;
+    };
+  })();
+
   return (
     <Drawer anchor="right" open={openCart} onClose={toggleCart}>
       <Box
         sx={{ width: drawerWidth, paddingTop: "20px", paddingLeft: "10px" }}
         role="presentation"
-        onClick={toggleCart}
         onKeyDown={toggleCart}
       >
         <List>
