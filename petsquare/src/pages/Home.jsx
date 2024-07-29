@@ -35,8 +35,6 @@ export default function Home() {
           See More
         </Button>
       )}
-
-      <Footer />
     </div>
   );
 }

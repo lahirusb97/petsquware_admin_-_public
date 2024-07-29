@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import { useCategoryWiseProduct } from "../hooks/useCategoryWiseProduct";
 import { useLocation, useParams } from "react-router-dom";
@@ -9,19 +9,19 @@ import { getCategoryWiseProductTest } from "../services/categoryService";
 
 export default function Category() {
   const location = useLocation();
-
-  // const productsPerPage = 4;
+  const [products, setProduct] = useState([]);
+  const productsPerPage = 4;
 
   // const { products, loading, loadMoreProducts } = useCategoryWiseProduct(
   //   10,
   //   location.pathname.replace("/", "")
   // );
-  console.log(location.pathname.replace("/", ""));
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const fetchedProducts = await getCategoryWiseProductTest("cat");
-        console.log(fetchedProducts);
+        const fetchedProducts = await getCategoryWiseProductTest("dog");
+        setProduct(fetchedProducts);
       } catch (err) {
         console.log(err);
       } finally {
@@ -33,9 +33,8 @@ export default function Category() {
   return (
     <div>
       <NavBar />
-
       <div className="flex flex-wrap gap-4 justify-center my-8">
-        {/* {products.map((product) => (
+        {products.map((product) => (
           <Card
             key={product.id}
             img={product.images ? product.images[0] : imgb1}
@@ -44,15 +43,13 @@ export default function Category() {
             pricing={product.pricing}
             id={product.id}
           />
-        ))} */}
+        ))}
       </div>
       {/* {loading && <div>Loading...</div>}
 
       <Button onClick={loadMoreProducts} className="see-more-btn">
         See More
       </Button> */}
-
-      <Footer />
     </div>
   );
 }

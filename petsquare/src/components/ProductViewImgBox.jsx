@@ -79,7 +79,7 @@ export default function ProductViewImgBox() {
       {/* Product Image Display */}
       <div className="max-w-lg">
         <img
-          className="w-full"
+          className="w-96 object-contain cursor-pointer"
           src={productData.images[currentImg]}
           alt={`Product ${currentImg}`}
         />
@@ -93,7 +93,7 @@ export default function ProductViewImgBox() {
                   onClick={() => handleImageClick(index)}
                 >
                   <img
-                    className="w-full object-contain cursor-pointer"
+                    className="w-96  object-contain cursor-pointer"
                     src={img}
                     alt={`Product ${index}`}
                   />

@@ -1,4 +1,5 @@
 const functions = require("firebase-functions");
+const cors = require("cors")({ origin: true });
 const admin = require("firebase-admin");
 const stripe = require("stripe")(
   "sk_test_51PXmjKIT4CAR61BEcyFtkdcQLbyy5PJdtALtVf2Hdf4v5tfkYKc1w0H0lSB2axJWBbOyF7KJyEYe9k9bIcVEwIOz00jq0fIBH2"
@@ -79,3 +80,26 @@ const addDataToStripe = async (newValue) => {
     return { success: false, error: error.message };
   }
 };
+exports.createCheckoutSession = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    console.log(req.body);
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        success_url: "http://localhost:5173/success",
+        cancel_url: "http://localhost:5173/cancel",
+        line_items: req.body,
+        mode: "payment",
+        shipping_options: [
+          {
+            shipping_rate: "shr_1PYfTPIT4CAR61BEwlQOGbDh",
+          },
+        ],
+      });
+      res.json({ url: session.url }); // Send JSON response with the URL to redirect
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+});

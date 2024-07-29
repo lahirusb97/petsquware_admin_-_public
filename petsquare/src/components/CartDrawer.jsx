@@ -12,6 +12,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCartContext } from "../context/CartContext";
 import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
 export default function CartDrawer() {
   const {
     openCart,
@@ -31,33 +32,39 @@ export default function CartDrawer() {
     0
   );
   const checkoutToStripe = async () => {
-    const items = cartItems.map((item) => ({
+    const items = await cartItems.map((item) => ({
       price: item.id,
       quantity: item.userSelectQty,
     }));
-
-    const stripe = await getStripe();
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: items,
-      mode: "payment",
-      successUrl: `${window.location.origin}/success`,
-      cancelUrl: `${window.location.origin}/cancel`,
-    });
-    if (error) {
-      console.error(error);
+    console.log(items);
+    try {
+      const response = await axios.post(
+        "http://localhost:5001/pets-square/us-central1/createCheckoutSession",
+        items, // Send data as JSON object
+        {
+          headers: {
+            "Content-Type": "application/json", // Ensure Content-Type is set to JSON
+          },
+        }
+      );
+      const { url } = response.data;
+      window.location.href = url; // Redirect to Stripe Checkout
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
     }
   };
-  const getStripe = (() => {
-    let stripePromise;
-    return () => {
-      if (!stripePromise) {
-        stripePromise = loadStripe(
-          "pk_test_51PXmjKIT4CAR61BEQ8aawVjGMNA1Mb0dWva2ldQv9foYNczkIsWpRBluZRysZq1fKAMm70FdqzdhNGCC3JTpu8O5003j5OQ775"
-        );
-      }
-      return stripePromise;
-    };
-  })();
+
+  // const getStripe = (() => {
+  //   let stripePromise;
+  //   return () => {
+  //     if (!stripePromise) {
+  //       stripePromise = loadStripe(
+  //         "pk_test_51PXmjKIT4CAR61BEQ8aawVjGMNA1Mb0dWva2ldQv9foYNczkIsWpRBluZRysZq1fKAMm70FdqzdhNGCC3JTpu8O5003j5OQ775"
+  //       );
+  //     }
+  //     return stripePromise;
+  //   };
+  // })();
 
   return (
     <Drawer anchor="right" open={openCart} onClose={toggleCart}>

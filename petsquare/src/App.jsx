@@ -11,7 +11,11 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { useEffect } from "react";
 import CatCategory from "./pages/CatCategory";
-
+import Search from "./pages/Search";
+import NavBar from "./components/NavBar";
+import Footer from "./pages/Footer";
+import Sucess from "./pages/Sucess";
+import Cancel from "./pages/Cancel";
 function App() {
   const { toggleCart } = useCartContext();
 
@@ -36,20 +40,30 @@ function App() {
       element: <Category />,
       errorElement: <div>error</div>,
     },
-    // {
-    //   path: "/success",
-    //   element: <Cancel />,
-    //   errorElement: <div>error</div>,
-    // },
-    // {
-    //   path: "/cancel",
-    //   element: <Sucess />,
-    //   errorElement: <div>error</div>,
-    // },
+    {
+      path: "/success",
+      element: <Sucess />,
+      errorElement: <div>error</div>,
+    },
+    {
+      path: "/cancel",
+      element: <Cancel />,
+      errorElement: <div>error</div>,
+    },
+    {
+      path: "/search/:searchtext",
+      element: (
+        <div>
+          <NavBar />
+          <Search />
+        </div>
+      ),
+      errorElement: <div>error</div>,
+    },
   ]);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col justify-between">
       <RouterProvider router={router} />
       <CartDrawer />
       <div className="fixed bottom-4 right-4 z-10">
@@ -62,6 +76,7 @@ function App() {
           <CategoryRounded />
         </Fab>
       </div>
+      <Footer className="mt-auto" />
     </div>
   );
 }

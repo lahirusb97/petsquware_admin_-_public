@@ -16,7 +16,7 @@ export const useCategoryWiseProduct = (productsPerPage, category) => {
           lastVisible: initialLastVisible,
           hasMore: initialHasMore,
         } = await fetchCategoryWiseProduct(productsPerPage, category);
-        console.log(initialProducts);
+        console.log(products);
         setProducts(initialProducts);
         setLastVisible(initialLastVisible);
         setHasMore(initialHasMore);
