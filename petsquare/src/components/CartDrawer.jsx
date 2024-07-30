@@ -40,7 +40,7 @@ export default function CartDrawer() {
     try {
       const response = await axios.post(
         "http://localhost:5001/pets-square/us-central1/createCheckoutSession",
-        items, // Send data as JSON object
+        { items: items, total: totalPrice },
         {
           headers: {
             "Content-Type": "application/json", // Ensure Content-Type is set to JSON

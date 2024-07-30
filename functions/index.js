@@ -82,24 +82,48 @@ const addDataToStripe = async (newValue) => {
 };
 exports.createCheckoutSession = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
-    console.log(req.body);
-
     try {
+      // Check if the request body contains the required properties
+      if (!req.body || !req.body.items || !req.body.total) {
+        return res.status(400).send("Bad Request: Missing required fields.");
+      }
+
+      // Determine the shipping rate based on the total amount
+      let shippingRate;
+      if (req.body.total > 30) {
+        shippingRate = "shr_1PhxVgIT4CAR61BEJ54Jma31"; // Free shipping rate ID
+      } else {
+        shippingRate = "shr_1PYfTPIT4CAR61BEwlQOGbDh"; // Standard shipping rate ID
+      }
+
+      // Create a new Checkout Session
       const session = await stripe.checkout.sessions.create({
         success_url: "http://localhost:5173/success",
         cancel_url: "http://localhost:5173/cancel",
-        line_items: req.body,
+        line_items: req.body.items,
         mode: "payment",
         shipping_options: [
           {
-            shipping_rate: "shr_1PYfTPIT4CAR61BEwlQOGbDh",
+            shipping_rate: shippingRate,
           },
         ],
       });
-      res.json({ url: session.url }); // Send JSON response with the URL to redirect
+
+      // Send the session URL to the client
+      res.json({ url: session.url });
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      res.status(500).send("Internal Server Error");
+
+      if (error.type === "StripeInvalidRequestError") {
+        // Handle invalid request errors from Stripe
+        res.status(400).send("Invalid request: " + error.message);
+      } else if (error.type === "StripeAPIError") {
+        // Handle general API errors from Stripe
+        res.status(500).send("Stripe API error: " + error.message);
+      } else {
+        // Handle other errors
+        res.status(500).send("Internal Server Error: " + error.message);
+      }
     }
   });
 });
