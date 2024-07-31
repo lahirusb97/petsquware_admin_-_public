@@ -17,6 +17,7 @@ const ColorAdd = ({ colorsData, setColors }) => {
   const [inputText, setInputText] = useState("");
   const [inputPrice, setInputPrice] = useState("");
   const [inputQuantity, setInputQuantity] = useState("");
+  const [priceId, setpriceId] = useState("");
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
@@ -32,17 +33,31 @@ const ColorAdd = ({ colorsData, setColors }) => {
 
   const handleAddColor = () => {
     if (inputText && inputPrice && inputQuantity) {
-      setColors([
-        ...colorsData,
-        {
+      if (priceId) {
+        let productToUpdate = colorsData.findIndex(
+          (product) => product.id === priceId
+        );
+        colorsData[productToUpdate] = {
+          ...colorsData[productToUpdate],
           color: inputText,
           price: parseFloat(inputPrice),
           quantity: parseInt(inputQuantity),
-        },
-      ]);
+        };
+        setColors([...colorsData]);
+      } else {
+        setColors([
+          ...colorsData,
+          {
+            color: inputText,
+            price: parseFloat(inputPrice),
+            quantity: parseInt(inputQuantity),
+          },
+        ]);
+      }
       setInputText("");
       setInputPrice("");
       setInputQuantity("");
+      setpriceId("");
     }
   };
 
@@ -50,7 +65,12 @@ const ColorAdd = ({ colorsData, setColors }) => {
     const newColorsData = colorsData.filter((_, i) => i !== index);
     setColors(newColorsData);
   };
-
+  const handleColorEdit = (item, index) => {
+    setInputPrice(item.price);
+    setInputQuantity(item.quantity);
+    setInputText(item.color);
+    setpriceId(item.id ? item.id : "");
+  };
   return (
     <div className=" w-full border m-2 p-2 flex sm:flex-row flex-col">
       <div className="sm:w-96 w-full">
@@ -98,48 +118,50 @@ const ColorAdd = ({ colorsData, setColors }) => {
       {/* Color Chips */}
       <div className="w-full flex flex-wrap items-baseline">
         {colorsData.map((item, index) => (
-          <Card
-            key={index}
-            style={{ margin: "10px", width: "150px", position: "relative" }}
-          >
-            <Tooltip title={`Remove ${item.color}`}>
-              <IconButton
-                size="small"
-                onClick={() => handleRemoveColor(index)}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  backgroundColor: "#fff",
-                  zIndex: 1,
-                }}
-              >
-                <Delete color="error" fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <CardContent>
-              <div
-                style={{
-                  backgroundColor: item.color,
-                  height: "100px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                  marginBottom: "10px",
-                }}
-              />
-              <Typography textAlign={"center"} variant="h6">
-                {item.color}
-              </Typography>
+          <div onClick={() => handleColorEdit(item, index)}>
+            <Card
+              key={index}
+              style={{ margin: "10px", width: "150px", position: "relative" }}
+            >
+              <Tooltip title={`Remove ${item.color}`}>
+                <IconButton
+                  size="small"
+                  onClick={() => handleRemoveColor(index)}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    backgroundColor: "#fff",
+                    zIndex: 1,
+                  }}
+                >
+                  <Delete color="error" fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <CardContent>
+                <div
+                  style={{
+                    backgroundColor: item.color,
+                    height: "100px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    marginBottom: "10px",
+                  }}
+                />
+                <Typography textAlign={"center"} variant="h6">
+                  {item.color}
+                </Typography>
 
-              <Typography textAlign={"center"} variant="subtitle1">
-                Aud${item.price}
-              </Typography>
+                <Typography textAlign={"center"} variant="subtitle1">
+                  Aud${item.price}
+                </Typography>
 
-              <Typography textAlign={"center"} variant="body2">
-                Quantitiy:{item.quantity}
-              </Typography>
-            </CardContent>
-          </Card>
+                <Typography textAlign={"center"} variant="body2">
+                  Quantitiy:{item.quantity}
+                </Typography>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
     </div>

@@ -63,12 +63,10 @@ export async function addProduct(data) {
     return { success: false, error: error.message };
   }
 }
-
-//* UPDATE PRODUCT
-export async function updateProduct(ID, data) {
+//* Update PRODUCT WITH RANDOM ID
+export async function updateProduct(data, id) {
   try {
-    const productRef = doc(db, "product", ID);
-    await updateDoc(productRef, data);
+    const docRef = await updateDoc(doc(db, "product", id), data);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };

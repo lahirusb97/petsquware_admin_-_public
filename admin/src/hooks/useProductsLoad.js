@@ -25,7 +25,7 @@ export const useProductLoad = (coll) => {
         setTotalCount(count);
 
         // Initial query (limit 1)
-        const initialQ = query(collection(db, "product"), limit(1));
+        const initialQ = query(collection(db, "product"), limit(20));
         const initialUnsubscribe = onSnapshot(initialQ, (initialSnapshot) => {
           const initialProductArray = initialSnapshot.docs.map((doc) => ({
             ...doc.data(),

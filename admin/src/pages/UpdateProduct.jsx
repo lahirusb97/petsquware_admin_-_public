@@ -14,7 +14,11 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { addProduct, uploadImages } from "../service/ProductService";
+import {
+  addProduct,
+  updateProduct,
+  uploadImages,
+} from "../service/ProductService";
 import { useToast } from "../context/ToastContext";
 import { useProductContext } from "../context/ProductContext";
 import { useParams } from "react-router-dom";
@@ -31,19 +35,28 @@ export default function UpdateProduct() {
   const [loading, setLoading] = React.useState(false);
   const [colorsData, setColors] = React.useState([]);
   const { products } = useProductContext();
-
+  const [id, setId] = React.useState({
+    docId: "",
+    imgID: "",
+  });
   const { showToast } = useToast();
+  console.log(id);
   const useParam = useParams();
   React.useEffect(() => {
     const checkProduct = products.find(
       (product) => product.id === useParam["product"]
     );
+
     if (checkProduct) {
       setValue("name", checkProduct.name);
       setValue("category", checkProduct.category);
       setValue("description", checkProduct.description);
       setValue("images", checkProduct.images);
       setColors(checkProduct.pricing);
+      setId({
+        docId: checkProduct.id,
+        imgID: checkProduct.imgID,
+      });
     } else {
       // Array is empty or no matching product found
       // Your logic here
@@ -56,6 +69,7 @@ export default function UpdateProduct() {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -74,24 +88,28 @@ export default function UpdateProduct() {
 
   const onSubmit = async (data) => {
     if (colorsData.length > 0) {
-      const ID = nanoid();
+      const combinedData = { ...data, pricing: colorsData };
 
       setLoading(true);
 
-      const imgData = await uploadImages(ID, data.images);
+      const imgData = await uploadImages(id.imgID, data.images);
       if (imgData.success) {
-        const updateDoc = await addProduct({
-          ...data,
-          pricing: colorsData,
-          images: imgData.imageUrls,
-          imgID: ID,
-        });
+        const updateDoc = await updateProduct(
+          {
+            ...data,
+            pricing: colorsData,
+            images: imgData.imageUrls,
+            edited: true,
+          },
+          id.docId
+        );
 
         if (updateDoc.success) {
           showToast("Success", "success");
           handleClose();
         } else {
           showToast("Error", "error");
+          console.log(updateDoc.error);
           setLoading(false);
         }
       } else {

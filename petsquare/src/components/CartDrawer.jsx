@@ -13,6 +13,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useCartContext } from "../context/CartContext";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
+import { LinearProgress } from "@mui/material";
+import ShippingProgressBar from "./ShippingProgressBar";
 export default function CartDrawer() {
   const {
     openCart,
@@ -32,6 +34,7 @@ export default function CartDrawer() {
     0
   );
   const checkoutToStripe = async () => {
+    console.log(cartItems);
     const items = await cartItems.map((item) => ({
       price: item.id,
       quantity: item.userSelectQty,
@@ -140,6 +143,22 @@ export default function CartDrawer() {
           <Divider />
           <Box mt={2} position={"absolute"} bottom={10} textAlign="center">
             <ListItemText primary={`Total Price: $${totalPrice.toFixed(2)}`} />
+            <Box mt={2}>
+              <ShippingProgressBar
+                value={totalPrice > 30 ? 100 : (totalPrice / 30) * 100}
+              />
+              <Box mt={1}>
+                {totalPrice > 30 ? (
+                  <ListItemText primary="Free shipping available!" />
+                ) : (
+                  <ListItemText
+                    primary={`Add $${(30 - totalPrice).toFixed(
+                      2
+                    )} more for free shipping`}
+                  />
+                )}
+              </Box>
+            </Box>
             <Button
               variant="contained"
               color="primary"

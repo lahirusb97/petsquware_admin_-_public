@@ -52,7 +52,6 @@ export default function AddDialog() {
     reset();
     setColors([]);
   };
-  React.useEffect(() => {}, []);
 
   const onSubmit = async (data) => {
     if (colorsData.length > 0) {
@@ -62,9 +61,14 @@ export default function AddDialog() {
 
       const imgData = await uploadImages(ID, data.images);
       if (imgData.success) {
+        const updatedColorsData = colorsData.map((color) => ({
+          ...color,
+          quantity: parseInt(color.quantity), // Convert to integer if it's not already
+          price: parseFloat(color.price), // Ensure price is a float
+        }));
         const updateDoc = await addProduct({
           ...data,
-          pricing: colorsData,
+          pricing: updatedColorsData,
           images: imgData.imageUrls,
           imgID: ID,
         });
