@@ -6,6 +6,7 @@ import DetailBox from "./DetailBox";
 import { useParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { convertPricesObjectToArray } from "../util/ObjToArray";
 
 export default function ProductViewImgBox() {
   const { product } = useParams();
@@ -15,10 +16,18 @@ export default function ProductViewImgBox() {
   useEffect(() => {
     const fetchProductData = async () => {
       const docRef = doc(db, "product", product); // Assuming "product" is your collection name
+
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProductData({ ...docSnap.data(), id: docSnap.id });
+          const pricingArray = convertPricesObjectToArray(
+            docSnap.data().pricing
+          );
+          setProductData({
+            ...docSnap.data(),
+            id: docSnap.id,
+            pricing: pricingArray,
+          });
         } else {
           console.log("No such document!");
         }

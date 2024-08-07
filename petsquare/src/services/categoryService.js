@@ -8,6 +8,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { convertPricesObjectToArray } from "../util/ObjToArray";
 
 const productsCollection = collection(db, "product");
 export const getCategoryWiseProductTest = async (category) => {
@@ -20,10 +21,9 @@ export const getCategoryWiseProductTest = async (category) => {
   const querySnapshot = await getDocs(productsQuery);
   const fetchedProducts = [];
   querySnapshot.forEach((doc) => {
-    fetchedProducts.push({
-      id: doc.id,
-      ...doc.data(),
-    });
+    const data = doc.data();
+    const pricingArray = convertPricesObjectToArray(data.pricing);
+    results.push({ id: doc.id, ...data, pricing: pricingArray });
   });
 
   return fetchedProducts;
@@ -43,7 +43,9 @@ export const searchProductsByName = async (searchTerm) => {
     const results = [];
 
     querySnapshot.forEach((doc) => {
-      results.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      const pricingArray = convertPricesObjectToArray(data.pricing);
+      results.push({ id: doc.id, ...data, pricing: pricingArray });
     });
 
     console.log("Search results:", results);

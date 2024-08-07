@@ -22,6 +22,8 @@ import {
 import { useToast } from "../context/ToastContext";
 import { useProductContext } from "../context/ProductContext";
 import { useParams } from "react-router-dom";
+import { convertPricingObjectToArray } from "../utill/ObjToArray";
+import { convertPricesArrayToObject } from "../utill/ArrayToObj";
 
 // Define the validation schema
 const schema = yup.object().shape({
@@ -40,7 +42,7 @@ export default function UpdateProduct() {
     imgID: "",
   });
   const { showToast } = useToast();
-  console.log(id);
+
   const useParam = useParams();
   React.useEffect(() => {
     const checkProduct = products.find(
@@ -57,6 +59,13 @@ export default function UpdateProduct() {
         docId: checkProduct.id,
         imgID: checkProduct.imgID,
       });
+      setColors(convertPricingObjectToArray(checkProduct.pricing));
+      // setColors(
+      //   convertPricingObjectToArray({
+      //     1: { color: "red", price: 10, quantity: 2 },
+      //     2: { color: "green", price: 10, quantity: 2 },
+      //   })
+      // );
     } else {
       // Array is empty or no matching product found
       // Your logic here
@@ -86,9 +95,12 @@ export default function UpdateProduct() {
     setColors([]);
   };
 
+  //! sent to DB
   const onSubmit = async (data) => {
     if (colorsData.length > 0) {
       const combinedData = { ...data, pricing: colorsData };
+      console.log(combinedData);
+      console.log(convertPricesArrayToObject(colorsData));
 
       setLoading(true);
 
@@ -97,7 +109,7 @@ export default function UpdateProduct() {
         const updateDoc = await updateProduct(
           {
             ...data,
-            pricing: colorsData,
+            pricing: convertPricesArrayToObject(colorsData),
             images: imgData.imageUrls,
             edited: true,
           },

@@ -61,16 +61,21 @@ export default function AddDialog() {
 
       const imgData = await uploadImages(ID, data.images);
       if (imgData.success) {
-        const updatedColorsData = colorsData.map((color) => ({
-          ...color,
-          quantity: parseInt(color.quantity), // Convert to integer if it's not already
-          price: parseFloat(color.price), // Ensure price is a float
-        }));
+        //Converting to OBJ
+        const updatedColorsData = colorsData.reduce((acc, color, index) => {
+          acc[index] = {
+            ...color,
+            quantity: parseInt(color.quantity, 10), // Convert to integer if it's not already
+            price: parseFloat(color.price), // Ensure price is a float
+          };
+          return acc;
+        }, {});
         const updateDoc = await addProduct({
           ...data,
           pricing: updatedColorsData,
           images: imgData.imageUrls,
           imgID: ID,
+          edited: false,
         });
 
         if (updateDoc.success) {
