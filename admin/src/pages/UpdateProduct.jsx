@@ -54,18 +54,12 @@ export default function UpdateProduct() {
       setValue("category", checkProduct.category);
       setValue("description", checkProduct.description);
       setValue("images", checkProduct.images);
-      setColors(checkProduct.pricing);
+
       setId({
         docId: checkProduct.id,
         imgID: checkProduct.imgID,
       });
       setColors(convertPricingObjectToArray(checkProduct.pricing));
-      // setColors(
-      //   convertPricingObjectToArray({
-      //     1: { color: "red", price: 10, quantity: 2 },
-      //     2: { color: "green", price: 10, quantity: 2 },
-      //   })
-      // );
     } else {
       // Array is empty or no matching product found
       // Your logic here

@@ -7,6 +7,9 @@ admin.initializeApp();
 //Call Functions
 const { addDataToStripe } = require("./stripe/createNewProduct");
 const { addData } = require("./firebase/updateProduct");
+const { updateMainData } = require("./stripe/updateMainData");
+const { priceUpdate } = require("./stripe/priceUpdate");
+const { updatePriceMetaData } = require("./stripe/updatePriceMetaData");
 //Call Functions
 
 exports.onProductCreated = functions.firestore
@@ -14,20 +17,16 @@ exports.onProductCreated = functions.firestore
   .onCreate(async (data, context) => {
     const newData = data.data();
 
-    try {
-      const getStripeProductId = await addDataToStripe(newData);
+    const getStripeProductId = await addDataToStripe(newData);
 
-      if (getStripeProductId.success) {
-        addData(
-          context.params.productId,
-          getStripeProductId.stripeProductId,
-          getStripeProductId.prices
-        );
-      } else {
-        addData(context.params.productId, "error", {});
-      }
-    } catch (error) {
-      console.error("Error during onProductCreated:", error);
+    if (getStripeProductId.success) {
+      const data = {
+        stripeProductId: getStripeProductId.stripeProductId,
+        pricing: getStripeProductId.prices,
+      };
+      const updateData = addData(context.params.productId, data);
+    } else {
+      const updateData = addData(context.params.productId, "error", {});
     }
   });
 exports.createCheckoutSession = functions.https.onRequest((req, res) => {
@@ -97,121 +96,73 @@ exports.onDocumentUpdate = functions.firestore
   .onUpdate((change, context) => {
     const beforeData = change.before.data(); // The document's data before the update
     const afterData = change.after.data(); // The document's data after the update
-
+    //Update the product information
     if (afterData.edited) {
       updateStripeData(beforeData, afterData, context);
     }
   });
 
 const updateStripeData = async (beforeData, afterData, context) => {
-  try {
-    // Update the product information
-    await stripe.products.update(afterData.stripeProductId, {
-      name: afterData.name,
-      description: afterData.description,
-      images: afterData.images,
-      metadata: {
-        initial_stock: JSON.stringify(
-          Object.values(afterData.pricing).map((variation) => ({
-            color: variation.color,
-            quantity: variation.quantity,
-          }))
-        ),
-      },
-    });
+  // Update the product information
+  const updateProductMainData = await updateMainData(afterData);
 
-    // Process price updates
-    const afterDataChanges = {};
-    const priceUpdates = Object.values(afterData.pricing).map(
-      async (variation) => {
-        const beforeVariation = beforeData["pricing"][variation.id];
+  // Process price updates
+  if (updateProductMainData.success) {
+  } else {
+    console.log(updateProductMainData.error);
+  }
 
-        console.log("before------------------------>", beforeVariation);
-        console.log("after------------------------>", afterData);
+  const afterDataChanges = {};
+  const priceUpdates = Object.values(afterData.pricing).map(
+    async (variation) => {
+      const beforeVariation = beforeData["pricing"][variation.id];
 
-        // If the variation does not exist in beforeData, create a new price
-        if (!beforeVariation) {
-          const newPrice = await stripe.prices.create({
-            unit_amount: variation.price * 100, // price in cents
-            currency: "aud", // specify your currency as Australian dollars
-            product: afterData.stripeProductId,
-            metadata: {
-              color: variation.color,
-              quantity: variation.quantity,
-            },
-          });
-          console.log(
-            "New price created:++++++++++++++++++++++++++++++++++ line 1",
-            newPrice
-          );
-
+      // If the variation does not exist in beforeData, create a new price
+      if (!beforeVariation) {
+        //TODO create new price
+        const createNewPrice = await priceUpdate(variation, afterData);
+        const newPrice = createNewPrice.data;
+        if (createNewPrice.success) {
           afterDataChanges[newPrice.id] = {
             id: newPrice.id,
+            price: newPrice.price,
+            color: newPrice.color,
+            quantity: newPrice.quantity,
+          };
+        } else {
+          //! create new price Error handling
+          console.log(createNewPrice.error);
+        }
+      } else {
+        //TODO Update price Data
+        const updatedPrice = await updatePriceMetaData(variation);
+        if (updatedPrice.success) {
+          afterDataChanges[variation.id] = {
+            id: variation.id,
             price: variation.price,
             color: variation.color,
             quantity: variation.quantity,
           };
         } else {
-          // Check if the price has changed
-          if (beforeVariation.price != variation.price) {
-            const newPrice = await stripe.prices.create({
-              unit_amount: variation.price * 100, // price in cents
-              currency: "aud", // specify your currency as Australian dollars
-              product: afterData.stripeProductId,
-              metadata: {
-                color: variation.color,
-                quantity: variation.quantity,
-              },
-            });
-            afterDataChanges[newPrice.id] = {
-              id: newPrice.id,
-              price: variation.price,
-              color: variation.color,
-              quantity: variation.quantity,
-            };
-            console.log(
-              "New price created++++++++++++++++++++++++++++++++ line 2",
-              newPrice
-            );
-          } else {
-            // Update the existing price metadata if only color or quantity changed
-            const updatedPrice = await stripe.prices.update(variation.id, {
-              metadata: {
-                color: variation.color,
-                quantity: variation.quantity,
-              },
-            });
-            afterDataChanges[variation.id] = {
-              id: variation.id,
-              price: variation.price,
-              color: variation.color,
-              quantity: variation.quantity,
-            };
-            console.log(
-              "UPDATED ***********************************:",
-              updatedPrice
-            );
-          }
+          //! Update Price Data Error handling
+
+          console.log(createNewPrice.error);
         }
       }
-    );
+    }
+  );
 
-    await Promise.all(priceUpdates);
+  await Promise.all(priceUpdates);
 
-    // Update Firebase with the new price data
-    await admin
-      .firestore()
-      .collection("product")
-      .doc(context.params.docId)
-      .update({
-        pricing: afterDataChanges,
-        edited: false,
-      });
+  //TODO Update Firebase with the new price data
+  const data = { pricing: afterDataChanges, edited: false };
+  const storeUpdatedPriceData = await addData(context.params.docId, data);
 
-    console.log(
-      `Product and prices updated successfully for product ID: ${afterData.stripeProductId}`
-    );
-  } catch (error) {
-    console.error("Error updating Stripe data:", error);
+  if (storeUpdatedPriceData.success) {
+    console.log("Product updated successfully");
+  } else {
+    //! Store Price Data Error handling
+
+    console.log("Error updating product: ", storeUpdatedPriceData.error);
   }
 };

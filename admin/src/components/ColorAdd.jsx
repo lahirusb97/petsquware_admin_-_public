@@ -48,6 +48,7 @@ const ColorAdd = ({ colorsData, setColors }) => {
         setColors([
           ...colorsData,
           {
+            id: colorsData.length + 1,
             color: inputText,
             price: parseFloat(inputPrice),
             quantity: parseInt(inputQuantity),
